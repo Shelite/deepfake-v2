@@ -1,0 +1,23 @@
+# Liveness Service Dependencies
+# TensorFlow 2.15 + MediaPipe
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+python-multipart==0.0.6
+
+# Deep Learning
+tensorflow==2.15.0
+protobuf==3.20.3
+torch==2.1.0
+torchvision==0.16.0
+
+# Video & Image Processing
+opencv-python==4.8.1.78
+numpy==1.26.4
+Pillow==10.1.0
+
+# Face Detection & Landmarks
+mediapipe==0.10.9
+mtcnn==0.1.1
+
+# HTTP Client
+httpx==0.25.2

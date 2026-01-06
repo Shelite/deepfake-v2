@@ -1,0 +1,36 @@
+flowchart TD
+    A[User pilih model di landing] --> B{Route upload/<model>}
+    B --> C[Halaman upload: drag/drop & validasi type/size]
+    C -->|valid| D[Preview + tombol Analyze]
+    D --> E[getApiUrl: devtunnel/localhost -> :8000]
+    E --> F{Jenis file?}
+    F -->|video| G[/api/detect/video?model=<id>/]
+    F -->|image| H[/api/detect/image?model=<id>/]
+
+    subgraph Backend (FastAPI)
+      G --> I[main.py terima UploadFile]
+      H --> I
+      I --> J{Model tersedia?}
+      J -->|tidak| K[Placeholder response]
+      J -->|ya| L[Simapan temp file]
+      L --> M[predict_video / predict_image]
+      M --> N[process_video_smart: ekstrak frame]
+      N --> O[MTCNN face detect]
+      O -->|no face| K
+      O -->|face| P[Preprocess: gamma 1.3, CLAHE, sharpness, resize 224]
+      P --> Q[Audio: ffmpeg -> MFCC atau zero-padding]
+      Q --> R[Model infer: Xception+GRU (+Conv1D audio)]
+      R --> S{pred > 0.515?}
+      S -->|ya| T[is_deepfake=true, confidence=(pred*100)%]
+      S -->|tidak| U[is_deepfake=false, confidence=((1-pred)*100)%]
+      T --> V[Response JSON]
+      U --> V
+    end
+
+    V --> W[Frontend terima JSON]
+    W -->|success| X[Render kartu hasil: status, confidence bar, raw_score, threshold, frames]
+    W -->|error| Y[Alert error + info API URL]
+
+    X --> Z{Aksi lanjutan}
+    Z -->|Reset| C
+    Z -->|Home| A

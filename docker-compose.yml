@@ -1,0 +1,149 @@
+version: '3.8'
+
+services:
+  # ==========================================
+  # DETECTION SERVICES (Microservices)
+  # ==========================================
+  
+  temporal:
+    build:
+      context: ./services/temporal
+      dockerfile: Dockerfile
+    container_name: deepfake-temporal
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./backend/weights:/app/weights:ro  # Read-only model weights
+      - temporal-uploads:/app/temp_uploads
+    environment:
+      - MODEL_PATH=weights/model_v10_optimized.h5
+      - PORT=8001
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8001/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - deepfake-net
+
+  liveness:
+    build:
+      context: ./services/liveness
+      dockerfile: Dockerfile
+    container_name: deepfake-liveness
+    ports:
+      - "8002:8002"
+    volumes:
+      - ./backend/weights:/app/weights:ro
+      - liveness-uploads:/app/temp_uploads
+    environment:
+      - MODEL_PATH=weights/rppg_model_lite.pth
+      - PORT=8002
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8002/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - deepfake-net
+
+  hybrid:
+    build:
+      context: ./services/hybrid
+      dockerfile: Dockerfile
+    container_name: deepfake-hybrid
+    ports:
+      - "8003:8003"
+    volumes:
+      - ./backend/weights:/app/weights:ro
+      - hybrid-uploads:/app/temp_uploads
+    environment:
+      - MODEL_PATH=weights/model_modul4_generalized.h5
+      - PORT=8003
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8003/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - deepfake-net
+
+  spatial:
+    build:
+      context: ./services/spatial
+      dockerfile: Dockerfile
+    container_name: deepfake-spatial
+    ports:
+      - "8004:8004"
+    volumes:
+      - ./backend/weights:/app/weights:ro
+      - spatial-uploads:/app/temp_uploads
+    environment:
+      - MODEL_PATH=weights/xception_modul1_final2.keras
+      - PORT=8004
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8004/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - deepfake-net
+
+  # ==========================================
+  # API GATEWAY (Ensemble Logic)
+  # ==========================================
+  
+  gateway:
+    build:
+      context: ./gateway
+      dockerfile: Dockerfile
+    container_name: deepfake-gateway
+    ports:
+      - "8000:8000"
+    environment:
+      - TEMPORAL_URL=http://temporal:8001
+      - LIVENESS_URL=http://liveness:8002
+      - HYBRID_URL=http://hybrid:8003
+      - SPATIAL_URL=http://spatial:8004
+    depends_on:
+      temporal:
+        condition: service_healthy
+      liveness:
+        condition: service_healthy
+      hybrid:
+        condition: service_healthy
+      spatial:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    networks:
+      - deepfake-net
+
+# ==========================================
+# VOLUMES (Isolated temp storage per service)
+# ==========================================
+volumes:
+  temporal-uploads:
+  liveness-uploads:
+  hybrid-uploads:
+  spatial-uploads:
+
+# ==========================================
+# NETWORK (Internal communication)
+# ==========================================
+networks:
+  deepfake-net:
+    driver: bridge

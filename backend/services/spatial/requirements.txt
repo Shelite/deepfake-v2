@@ -1,0 +1,21 @@
+# Spatial Service Dependencies
+# TensorFlow 2.20 + Keras 3.x + tf-keras
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+python-multipart==0.0.6
+
+# Deep Learning - TensorFlow 2.20 with Keras 3.x support
+tensorflow==2.20.0
+tf-keras==2.20.1
+keras==3.13.0
+
+# Video & Image Processing
+opencv-python==4.8.1.78
+numpy==1.26.4
+Pillow==10.1.0
+
+# Face Detection
+mtcnn==0.1.1
+
+# HTTP Client
+httpx==0.25.2

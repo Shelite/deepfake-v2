@@ -1,0 +1,24 @@
+# Temporal Service Dependencies
+# TensorFlow 2.15 with Keras 2.15 (stable)
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+python-multipart==0.0.6
+
+# Deep Learning
+tensorflow==2.15.0
+protobuf==3.20.3
+
+# Video & Image Processing
+opencv-python==4.8.1.78
+numpy==1.26.4
+Pillow==10.1.0
+
+# Audio Processing
+librosa==0.10.1
+soundfile==0.12.1
+
+# Face Detection
+mtcnn==0.1.1
+
+# HTTP Client for health checks
+httpx==0.25.2
