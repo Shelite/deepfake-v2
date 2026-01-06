@@ -2,6 +2,8 @@
 
 Sistem deteksi deepfake berbasis microservices dengan 4 model deteksi: Temporal, Liveness, Hybrid, dan Spatial.
 
+# Untuk Percobaan Disarankan Menggunakan run-dev-simple.ps1 tanpa docker
+
 ## 📋 Prerequisites
 
 - **Docker** & **Docker Compose** (recommended)
@@ -92,10 +94,10 @@ python main.py
 cd frontend
 
 # Install dependencies
-pnpm install
+npm install
 
 # Run development server
-pnpm dev
+npm run dev
 ```
 
 Frontend akan berjalan di http://localhost:3000
@@ -140,7 +142,7 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
 # Development
 .\setup-dev.ps1          # Setup development environment
 .\run-dev.ps1            # Run dengan Docker Compose
-.\run-dev-simple.ps1     # Run sederhana
+.\run-dev-simple.ps1     # Run sederhana (disarankan pakai ini untuk menjalankan backend)
 
 # Production
 .\start.ps1              # Start services
